@@ -38,10 +38,14 @@ def set_last_used_size_by_time_type(time_type: TimeTypeEnum, last_used_size_byte
     (current_dir / time_type.name).write_text(data=str(last_used_size_byte))
 
 
+def time_now() -> str:
+    return datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+
+
 def monitor():
     size_model = get_used_info()
 
-    contents = f"流量已使用: {convert_to_size_str(size_num=size_model.used_size_byte, decimal=3)}"
+    contents = f"{time_now()}: 流量已使用 {convert_to_size_str(size_num=size_model.used_size_byte, decimal=3)}"
     send_email(email_obj=EmailInfoModel(subject=f"流量使用情况",
                                         contents=contents))
     print(contents)
@@ -54,7 +58,7 @@ def alert_once(time_type: TimeTypeEnum):
     last_used_size_byte: Optional[int] = get_last_used_size_by_time_type(time_type=time_type)
     if last_used_size_byte is not None and size_model.used_size_byte - last_used_size_byte > data_max_bytes[time_type]:
         try:
-            contents = f"过去 1{time_type.name} 使用了 {convert_to_size_str(size_num=size_model.used_size_byte - last_used_size_byte, decimal=3)}!"
+            contents = f"{time_now()}: 过去 1{time_type.name} 使用了 {convert_to_size_str(size_num=size_model.used_size_byte - last_used_size_byte, decimal=3)}!"
             send_email(email_obj=EmailInfoModel(subject=f"流量使用({time_type.name})超标，警告！",
                                                 contents=contents))
 
